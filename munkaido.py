@@ -199,8 +199,6 @@ def input_window():
     start_window.mainloop()
 
 def check_inputs(entries, content, listbox, t):
-    print(content[0].get())
-    print(type(content[0].get()))
     try:
         if content[0].get() == '':
             raise NameError
