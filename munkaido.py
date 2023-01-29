@@ -1,10 +1,12 @@
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell
+from xlsxwriter.exceptions import FileCreateError
 import calendar
 import datetime
 import time
 import tkinter as tk
 from tkinter import messagebox
+import re
 
 #TODO: hibakezelés(inputok formátuma, megnyitott excel esetén, stb), visszajelzés a felvitt dolgozókrol,
 # évszám legyen protected???, conditional formatting
@@ -28,7 +30,7 @@ def create_excel(employees, year):
     days_hu={'vasárnap':6, 'hétfő':0, 'kedd':1, 'szerda':2,'csütörtök':3, 'péntek':4,'szombat':5}
 
     """Create the workbook and set the formats used in the excel"""
-    workbook = xlsxwriter.Workbook('sample_data4.xlsx')
+    workbook = xlsxwriter.Workbook('{}_Munkaido_nyilvantartas.xlsx'.format(year))
     title_format = workbook.add_format({"bold": True, "font_name": "Segoe UI", "font_size": 12})
     header_format = workbook.add_format({"bold": True, "font_name": "Segoe UI", "font_size": 8})
     year_format = workbook.add_format({"bold": True, "font_name": "Segoe UI", "font_size": 12, "align": "center", "valign": "vcenter", "border_color":"#C0C0C0", "top":2, "left":2, "right":2, "bottom":1})
@@ -135,63 +137,130 @@ def create_excel(employees, year):
                 print("error")
 
         sheet[i].merge_range(j + 9, 2, j + 9, col2, "", format_whole)
-    workbook.close()
-    messagebox.showinfo("", "Munkaidőnyilvántartás sikeresen legenerálva!")
+    try:
+        workbook.close()
+    except FileCreateError:
+        messagebox.showerror("Hiba!", "A munkaidő nyilvántartás ezzel a névvel már létezik is nyitva van. Kérem zárja be!")
+        request_year(employees)
+    else:
+        messagebox.showinfo("", "Munkaidőnyilvántartás sikeresen legenerálva!")
 
 def input_window():
     entries = [] # List for clearing the entry fields
 
     """Create the input window"""
-    app = tk.Tk()
-    app.geometry("450x350")
-    app.title("Munkaidő nyilvántartás generáló")
-
-    """Input year"""
-    tk.Label(app,text="Évszám:").place(x=40,y=30)
-    year = tk.StringVar(app)
-    tk.Entry(app,textvariable=year,width=10).place(x=130,y=30)
+    start_window.geometry("450x350")
+    start_window.title("Munkaidő nyilvántartás generáló")
 
     """Input employee's name"""
-    tk.Label(app, text="Dolgozó neve:").place(x=40, y=60)
-    name = tk.StringVar(app)
-    entries.append(tk.Entry(app, textvariable=name, width=40))
+    tk.Label(start_window, text="Dolgozó neve:").place(x=40, y=60)
+    name = tk.StringVar(start_window)
+    entries.append(tk.Entry(start_window, textvariable=name, width=40))
     entries[0].place(x=130, y=60)
 
     """Input start and end of the work"""
-    tk.Label(app, text="Munka kezdés:").place(x=40, y=90)
-    workstart1 = tk.StringVar(app)
-    entries.append(tk.Entry(app, textvariable=workstart1, width=10))
+    tk.Label(start_window, text="Munka kezdés:").place(x=40, y=90)
+    workstart1 = tk.StringVar(start_window)
+    entries.append(tk.Entry(start_window, textvariable=workstart1, width=10))
     entries[1].place(x=130, y=90)
-    tk.Label(app, text="Munka vége:").place(x=230, y=90)
-    workend1 = tk.StringVar(app)
-    entries.append(tk.Entry(app, textvariable=workend1, width=10))
+    tk.Label(start_window, text="Munka vége:").place(x=230, y=90)
+    workend1 = tk.StringVar(start_window)
+    entries.append(tk.Entry(start_window, textvariable=workend1, width=10))
     entries[2].place(x=310, y=90)
 
-    tk.Label(app, text="Munka kezdés:").place(x=40, y=120)
-    workstart2 = tk.StringVar(app)
-    entries.append(tk.Entry(app, textvariable=workstart2, width=10))
+    tk.Label(start_window, text="Munka kezdés:").place(x=40, y=120)
+    workstart2 = tk.StringVar(start_window)
+    entries.append(tk.Entry(start_window, textvariable=workstart2, width=10))
     entries[3].place(x=130, y=120)
-    tk.Label(app, text="Munka vége:").place(x=230, y=120)
-    workend2 = tk.StringVar(app)
-    entries.append(tk.Entry(app, textvariable=workend2, width=10))
+    tk.Label(start_window, text="Munka vége:").place(x=230, y=120)
+    workend2 = tk.StringVar(start_window)
+    entries.append(tk.Entry(start_window, textvariable=workend2, width=10))
     entries[4].place(x=310, y=120)
 
     """Input holidays"""
-    tk.Label(app, text="Szabadnapok:").place(x=40, y=150)
+    tk.Label(start_window, text="Szabadnapok:").place(x=40, y=150)
     days = ('Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap')
     holiday_items = tk.Variable(value=days)
-    listbox = tk.Listbox(app, listvariable=holiday_items, height=7, selectmode=tk.MULTIPLE)
+    listbox = tk.Listbox(start_window, listvariable=holiday_items, height=7, selectmode=tk.MULTIPLE)
     listbox.place(x=130, y=150)
 
     """Collect the content of the inputs"""
     content = [name, workstart1, workend1, workstart2, workend2]
 
-    """Action buttons: add new employee button, creat the excel button and exit button"""
-    add_button=tk.Button(app,text="Új dolgozó",command=lambda: add_employee(entries, content, listbox)).place(x=80, y=285)
-    export_button = tk.Button(app, text="Generálás", command=lambda: create_excel(employees, int(year.get()))).place(x=200, y=285)
-    exit_button = tk.Button(app, text="Kilépés", command="exit").place(x=300, y=285)
+    tk.Label(start_window, text="Felvitt dolgozók:").place(x=270, y=150)
+    t = tk.Text(start_window, width=15, height=5)
+    t.place(x=270, y=170)
 
-    app.mainloop()
+    """Action buttons: add new employee button, creat the excel button and exit button"""
+    tk.Button(start_window,text="Új dolgozó",command=lambda: check_inputs(entries, content, listbox, t)).place(x=80, y=285)
+    tk.Button(start_window, text="Tovább", command=lambda: check_employees(employees)).place(x=200, y=285)
+    tk.Button(start_window, text="Kilépés", command="exit").place(x=300, y=285)
+
+    start_window.mainloop()
+
+def check_inputs(entries, content, listbox, t):
+    print(content[0].get())
+    print(type(content[0].get()))
+    try:
+        if content[0].get() == '':
+            raise NameError
+        elif (re.findall("[1-9]:[0-9][0-9]|[1-2][0-9]:[0-9][0-9]", content[1].get()) == []):
+            raise Exception
+        elif (re.findall("[1-9]:[0-9][0-9]|[1-2][0-9]:[0-9][0-9]", content[2].get()) == []):
+            raise Exception
+        elif (re.findall("[1-9]:[0-9][0-9]|[1-2][0-9]:[0-9][0-9]", content[3].get()) == []) & (content[3].get() != '') | ((content[3].get() != '') & (content[4].get() == '')):
+            raise Exception
+        elif (re.findall("[1-9]:[0-9][0-9]|[1-2][0-9]:[0-9][0-9]", content[4].get()) == []) & (content[4].get() != '') | ((content[4].get() != '') & (content[3].get() == '')):
+            raise Exception
+    except NameError:
+        messagebox.showerror("Hiba!", "Kérem adja meg a dolgozó nevét!")
+    except Exception as time:
+        messagebox.showerror("Hiba!", "Kérem az munka kezdés és vége időpontot 'óra:perc' formátumban megadni!")
+    else:
+        add_employee(entries, content, listbox)
+        show_employees(t)
+
+def check_employees(employees):
+    try:
+        if employees == []:
+            raise NameError
+    except NameError:
+        messagebox.showerror("Hiba!", "Kérem vegyen fel legalább egy dolgozót!")
+    else:
+        request_year(employees)
+
+def check_year(employees, year):
+    try:
+        if year == '':
+            raise NameError
+        datetime.date(int(year),1,1)
+    except NameError:
+        messagebox.showerror("Hiba!", "Kérem adja meg az évszámot, amire szeretné a nyilvántartás legenerálni!")
+        request_year(employees)
+    except OverflowError:
+        messagebox.showerror("Hiba!", "Kérem adjon meg egy valós évszámot!")
+        request_year(employees)
+    except ValueError:
+        messagebox.showerror("Hiba!", "Kérem adjon meg egy valós évszámot!")
+        request_year(employees)
+    else:
+        create_excel(employees, int(year))
+
+def show_employees(t):
+    t.insert('end', employees[len(employees) - 1].name + '\n')
+
+def request_year(employees):
+    app = tk.Tk()
+    app.geometry("200x150")
+
+    """Input year"""
+    tk.Label(app,text="Évszám:").pack(expand='true')
+    year = tk.StringVar(app)
+    tk.Entry(app,textvariable=year,width=10).pack(expand='true')
+    tk.Button(app, text="Generálás", command=lambda: [check_year(employees, year.get()), close_window(app)]).pack(expand='true')
+
+def close_window(self):
+    self.destroy()
 
 def add_employee(entry_list, emp_data, listbox):
     holidays = [] # List of the selected holidays
@@ -207,6 +276,8 @@ def add_employee(entry_list, emp_data, listbox):
     listbox.selection_clear(0,'end')
 
 employees = [] # Global list for items of Employee class
+names =[]
+start_window = tk.Tk()
 
 """FINAL"""
 input_window() # Call of GUI
