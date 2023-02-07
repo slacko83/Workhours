@@ -1,0 +1,20 @@
+Használati utasítás:
+Ez a program a munkaidőnyilvántartás excel legenerálásához használható. Az alkalmazást a "munkaido.exe" file futtatásával lehet elindítani, ami
+után egy ablak ugrik fel. Itt lehet a nyilvántartásban szerepeltetni kívánt dolgozókat egymás után hozzáadni.
+
+Az ablakban a következő mezők kitöltésére van lehetőség:
+1. Dolgozó neve: Ide a dolgozók nevét kell beírni (kötelező kitölteni)
+2. Munka kezdés: Az adott dolgozó munkaidejének kezdetét kell beírni óó:pp formátumban (legalább az első sort kötelező kitölteni)
+3. Munka vége: Az adott dolgozó munkaidejének végét kell beírni óó:pp formátumban (legalább az első sort kötelező kitölteni)
+4. Szabadnapok: Az adott napra kattintással lehet kiválasztani és hozzáadni a szabadnapokat. Egyszerre több is kiválasztható,
+helytelen kiválasztás esetén az adott napra újra rákattintva lehet megszűntetni a kijelölést
+
+Az adatok kitöltés után az alkalmazott adatait a "Dolgozó rögzítése" gombra kattintva lehet rögzíteni és az meg is jelenik a "Felvitt dolgozók" mezőben.
+Új alkalmazottat a mezők újbóli kitöltésével és a "Dolgozó rögzítése" gombra kattintással lehet hozzáadni és a "Felvitt dolgozók" mezőben ellenőrizhetők
+a rögzített dolgozók.
+
+Ha minden alkalmazott rögzítésre került a "Tovább" gombra kattintva egy új ablakban lehet megadni az évszámot, amelyik évre szeretnénk az
+munkaidőnyilvántartás excelt legenerálni.
+Ezután a "Generálás" gomb használatával a nyilvántartás elkészül és a program mappájában, excel formátumban lementésre kerül.
+
+A program bezárás/újraindítása során a dolgozók adatai törlődnek, így újbóli generálás/javítás esetén az összes dolgozót újra rögzíteni kell!!!

@@ -192,9 +192,9 @@ def input_window():
     t.place(x=270, y=170)
 
     """Action buttons: add new employee button, creat the excel button and exit button"""
-    tk.Button(start_window,text="Új dolgozó",command=lambda: check_inputs(entries, content, listbox, t)).place(x=80, y=285)
-    tk.Button(start_window, text="Tovább", command=lambda: check_employees(employees)).place(x=200, y=285)
-    tk.Button(start_window, text="Kilépés", command="exit").place(x=300, y=285)
+    tk.Button(start_window,text="Dolgozó rögzítése",command=lambda: check_inputs(entries, content, listbox, t)).place(x=70, y=285)
+    tk.Button(start_window, text="Tovább", command=lambda: check_employees(employees)).place(x=210, y=285)
+    tk.Button(start_window, text="Kilépés", command="exit").place(x=320, y=285)
 
     start_window.mainloop()
 
